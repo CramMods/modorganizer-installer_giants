@@ -5,22 +5,6 @@ param (
     [Parameter()] [string] $InstallPath = [string]::Empty
 )
 
-switch ($Command) {
-    "make" {
-        Update-UI -SourcePath $SourcePath
-    }
-    "release" {
-        Update-UI -SourcePath $SourcePath
-        New-Release -SourcePath $SourcePath -BuildPath $BuildPath
-    }
-    "install" {
-        Update-UI -SourcePath $SourcePath
-        New-Release -SourcePath $SourcePath -BuildPath $BuildPath
-        Install-Release -BuildPath $BuildPath -InstallPath $InstallPath
-    }
-    default { throw [System.ArgumentException]::new("Unknown command: `"$Command`"") }
-}
-
 function Get-ProjectInfo {
     $ProjectFile = "./pyproject.toml"
     $FileContent = Get-Content -Path $ProjectFile
@@ -65,16 +49,16 @@ function Update-UI {
     param (
         [Parameter(Mandatory)] [string] $SourcePath
     )
-    
+
+    Write-Host "Building .ui files to .py... " -NoNewline
     $UIFiles = Get-ChildItem -Path $SourcePath -Include "*.ui" -Recurse -File
-    return $UIFiles | ForEach-Object -Process {
+    $UIFiles | ForEach-Object -Process {
         $OutputPath = [System.IO.Path]::ChangeExtension($_.FullName, "py")
         pyuic6.exe $_.FullName -o $OutputPath
-        return [PSCustomObject]@{
-            Source = $_.FullName
-            Output = $OutputPath
-        }
+        Write-Host "`n - $($_.FullName) -> $OutputPath" -ForegroundColor Magenta
     }
+    Write-Host "done" -ForegroundColor Green
+    Write-Host ""
 }
 
 function New-Release {
@@ -83,16 +67,24 @@ function New-Release {
         [Parameter(Mandatory)] [string] $BuildPath
     )
 
+    Write-Host "Copying files to release... " -NoNewline
     $Info = Get-ProjectInfo
     $TargetPath = Join-Path -Path $BuildPath -ChildPath $Info.Name
     Remove-Item -Path $TargetPath -Recurse -Force -ErrorAction Ignore
     New-Item -Path $TargetPath -ItemType Directory -Force | Out-Null
     Copy-Item -Path "$SourcePath/*" -Destination $TargetPath -Recurse -Exclude @("*.ui")
+    Write-Host "done" -ForegroundColor Green
+    Write-Host $TargetPath -ForegroundColor Magenta
+    Write-Host ""
 
+    Write-Host "Creating zip for release... " -NoNewline
     $ZipName = "$($Info.Name)-$($Info.Version).zip"
     $ZipPath = Join-Path -Path $BuildPath -ChildPath $ZipName
     Remove-Item -Path $ZipPath -Force -ErrorAction Ignore
     Compress-Archive -Path $TargetPath -DestinationPath $ZipPath
+    Write-Host "done" -ForegroundColor Green
+    Write-Host $ZipPath -ForegroundColor Magenta
+    Write-Host ""
 }
 
 function Install-Release {
@@ -101,10 +93,30 @@ function Install-Release {
         [Parameter(Mandatory)] [string] $InstallPath
     )
     
+    Write-Host "Installing release... " -NoNewline
     $Info = Get-ProjectInfo
     $ReleasePath = Join-Path -Path $BuildPath -ChildPath $Info.Name
     $TargetPath = Join-Path -Path $InstallPath -ChildPath $Info.Name
     Remove-Item -Path $TargetPath -Recurse -Force -ErrorAction Ignore
     New-Item -Path $TargetPath -ItemType Directory -Force | Out-Null
     Copy-Item -Path "$ReleasePath/*" -Destination $TargetPath -Recurse
+    Write-Host "done" -ForegroundColor Green
+    Write-Host $InstallPath -ForegroundColor Magenta
+    Write-Host ""
+}
+
+switch ($Command) {
+    "make" {
+        Update-UI -SourcePath $SourcePath
+    }
+    "release" {
+        Update-UI -SourcePath $SourcePath
+        New-Release -SourcePath $SourcePath -BuildPath $BuildPath
+    }
+    "install" {
+        Update-UI -SourcePath $SourcePath
+        New-Release -SourcePath $SourcePath -BuildPath $BuildPath
+        Install-Release -BuildPath $BuildPath -InstallPath $InstallPath
+    }
+    default { throw [System.ArgumentException]::new("Unknown command: `"$Command`"") }
 }
