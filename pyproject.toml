@@ -1,0 +1,62 @@
+[tool.poetry]
+name = "installer_giants"
+version = "1.0.0"
+description = ""
+authors = ["Grant Le Roux <cram42@users.noreply.github.com>"]
+license = "GPL-3.0-or-later"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+pyqt6 = "^6.7.1"
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.8.2"
+pyright = "^1.1.390"
+poethepoet = "^0.31.1"
+mobase-stubs = "^2.5.2"
+poetry-bumpversion = "^0.3.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poe.tasks]
+lint-ruff        = "ruff check ."
+lint-ruff-format = "ruff format --check ."
+lint-pyright     = "pyright ."
+lint.sequence    = ["lint-ruff", "lint-ruff-format", "lint-pyright"]
+lint.ignore_fail = "return_non_zero"
+format-imports   = "ruff check --select I . --fix"
+format-ruff      = "ruff format ."
+format.sequence  = ["format-imports", "format-ruff"]
+
+[tool.ruff]
+target-version = "py312"
+
+[tool.ruff.lint]
+extend-select = ["B", "Q", "I"]
+
+[tool.ruff.lint.isort.sections]
+mobase = ["mobase"]
+
+[tool.ruff.lint.isort]
+section-order = [
+    "future",
+    "standard-library",
+    "third-party",
+    "first-party",
+    "mobase",
+    "local-folder"
+]
+
+[tool.pyright]
+exclude = [".venv"]
+typeCheckingMode = "strict"
+reportMissingTypeStubs = true
+reportMissingModuleSource = false
+pythonPlatform = "Windows"
+
+[tool.poetry_bumpversion.file."src/plugin.py"]
+search  = 'VersionInfo("{current_version}")'
+replace = 'VersionInfo("{new_version}")'
