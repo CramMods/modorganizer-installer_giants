@@ -24,7 +24,7 @@ build-backend = "poetry.core.masonry.api"
 [tool.poe.tasks]
 lint-ruff        = "ruff check ."
 lint-ruff-format = "ruff format --check ."
-lint-pyright     = "pyright ."
+lint-pyright     = "pyright"
 lint.sequence    = ["lint-ruff", "lint-ruff-format", "lint-pyright"]
 lint.ignore_fail = "return_non_zero"
 format-imports   = "ruff check --select I . --fix"
@@ -51,7 +51,8 @@ section-order = [
 ]
 
 [tool.pyright]
-exclude = [".venv"]
+include = ["src"]
+exclude = ["src/ui"]
 typeCheckingMode = "strict"
 reportMissingTypeStubs = true
 reportMissingModuleSource = false
