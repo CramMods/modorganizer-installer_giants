@@ -24,7 +24,7 @@ from .dialog import InstallerDialog
 class InstallerPlugin(IPluginInstallerSimple):
     _organizer: IOrganizer
     _installingArchive: str
-    _supportedGames: list[str] = ["farm25"]
+    _supportedGames: list[str] = ["farmingsimulator25"]
 
     # IPlugin Implementation
 
@@ -35,7 +35,7 @@ class InstallerPlugin(IPluginInstallerSimple):
         return "Cram42"
 
     def version(self) -> VersionInfo:
-        return VersionInfo("1.0.0")
+        return VersionInfo("1.1.0")
 
     def description(self) -> str:
         return "Installer for GIANTS Software game mods"

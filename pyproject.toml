@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "installer_giants"
-version = "1.0.0"
+version = "1.1.0"
 description = ""
 authors = ["Grant Le Roux <cram42@users.noreply.github.com>"]
 license = "GPL-3.0-or-later"
