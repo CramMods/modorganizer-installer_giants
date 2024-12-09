@@ -67,6 +67,20 @@ class InstallerPlugin(IPluginInstallerSimple):
         self._installingArchive = archive
         return super().onInstallationStart(archive, reinstallation, current_mod)
 
+    def onInstallationEnd(self, result: InstallResult, new_mod: IModInterface) -> None:
+        if result == InstallResult.SUCCESS:
+            relPath = self.findManifest(new_mod.fileTree())
+            absPath = str(Path(new_mod.absolutePath()).joinpath(relPath))
+            manifest = ModManifest(absPath)
+
+            for category in new_mod.categories():
+                new_mod.removeCategory(category)
+
+            for category in manifest.categories():
+                new_mod.addCategory(category)
+
+        return super().onInstallationEnd(result, new_mod)
+
     # IPluginInstallerSimple Implementation
 
     def install(
@@ -106,3 +120,18 @@ class InstallerPlugin(IPluginInstallerSimple):
                 return (InstallResult.MANUAL_REQUESTED, newTree, manifest.version(), 0)
             else:
                 return InstallResult.CANCELED
+
+    # Other
+
+    def findManifest(self, tree: IFileTree, depth: int = 0) -> str:
+        item = tree.find("modDesc.xml", FileTreeEntry.FileTypes.FILE)
+
+        if isinstance(item, FileTreeEntry):
+            return item.path()
+        else:
+            if depth <= 1:
+                for entry in tree:
+                    if entry.isDir() and isinstance(entry, IFileTree):
+                        return self.findManifest(entry, depth + 1)
+
+        raise Exception("manifest not found")

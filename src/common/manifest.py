@@ -68,6 +68,14 @@ class ModManifest(Manifest):
     def storeItemManifests(self) -> list[StoreItemManifest]:
         return [StoreItemManifest(p) for p in self.storeItemManifestPaths()]
 
+    def categories(self) -> list[str]:
+        categories: list[str] = []
+        for manifest in self.storeItemManifests():
+            for category in manifest.categories():
+                if category not in categories:
+                    categories.append(category)
+        return categories
+
 
 class StoreItemManifest(Manifest):
     def type(self) -> str:
@@ -76,3 +84,13 @@ class StoreItemManifest(Manifest):
     def name(self) -> str:
         return self.xmlText("./storeData/name/en") or "UNKNOWN"
 
+    def categories(self) -> list[str]:
+        categories: list[str] = []
+
+        text = self.xmlText("./storeData/category")
+        if text is not None:
+            textChunks = text.split(" ")
+            for textChunk in textChunks:
+                categories.append("store:{}".format(textChunk.strip()))
+
+        return categories
