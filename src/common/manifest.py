@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 import xml.etree.cElementTree as et
+from pathlib import Path
 
 
 class Manifest:
@@ -49,4 +52,27 @@ class ModManifest(Manifest):
     def description(self) -> str:
         text = self.xmlText("./description/en") or ""
         return text.strip().removeprefix("<![CDATA[").removesuffix("]]>").strip()
+
+    def storeItemManifestPaths(self) -> list[str]:
+        paths: list[str] = []
+
+        storeItems = self.xmlElement("./storeItems")
+        if storeItems:
+            for itemElement in storeItems.findall("storeItem"):
+                relPath = itemElement.attrib["xmlFilename"]
+                absPath = Path(self.path()).parent.joinpath(relPath).absolute()
+                paths.append(str(absPath))
+
+        return paths
+
+    def storeItemManifests(self) -> list[StoreItemManifest]:
+        return [StoreItemManifest(p) for p in self.storeItemManifestPaths()]
+
+
+class StoreItemManifest(Manifest):
+    def type(self) -> str:
+        return self.xmlRoot().tag
+
+    def name(self) -> str:
+        return self.xmlText("./storeData/name/en") or "UNKNOWN"
 
