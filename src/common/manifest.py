@@ -20,41 +20,33 @@ class Manifest:
     def xmlRoot(self) -> et.Element:
         return self._root
 
-    def xmlElement(self, xPath: str) -> et.Element:
-        element = self._root.find(xPath)
-        if element is None:
-            raise Exception("Element not found")
-        return element
+    def xmlElement(self, xPath: str) -> et.Element | None:
+        return self._root.find(xPath)
 
-    def xmlText(self, xPath: str) -> str:
+    def xmlText(self, xPath: str) -> str | None:
         element = self.xmlElement(xPath)
-        text = element.text
-        if text is None:
-            raise Exception("Element does not contain text")
-        return text
+        return element.text if element is not None else None
 
-    def xmlAttribute(self, xPath: str, attribute: str) -> str:
+    def xmlAttribute(self, xPath: str, attr: str) -> str | None:
         element = self.xmlElement(xPath)
-        if attribute not in element.attrib.keys():
-            raise Exception("Element does not contain attribute")
-        return element.attrib[attribute]
+        return (
+            element.attrib[attr]
+            if element is not None and attr in element.attrib.keys()
+            else None
+        )
 
 
 class ModManifest(Manifest):
     def name(self) -> str:
-        return self.xmlText("./title/en")
+        return self.xmlText("./title/en") or "UNKNOWN"
 
     def author(self) -> str:
-        return self.xmlText("./author")
+        return self.xmlText("./author") or "UNKNOWN"
 
     def version(self) -> str:
-        return self.xmlText("./version")
+        return self.xmlText("./version") or "UNKNOWN"
 
     def description(self) -> str:
-        return (
-            self.xmlText("./description/en")
-            .strip()
-            .removeprefix("<![CDATA[")
-            .removesuffix("]]>")
-            .strip()
-        )
+        text = self.xmlText("./description/en") or ""
+        return text.strip().removeprefix("<![CDATA[").removesuffix("]]>").strip()
+
