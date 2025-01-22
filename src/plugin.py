@@ -35,7 +35,7 @@ class InstallerPlugin(IPluginInstallerSimple):
         return "Cram42"
 
     def version(self) -> VersionInfo:
-        return VersionInfo("1.2.0")
+        return VersionInfo("1.2.1")
 
     def description(self) -> str:
         return "Installer for GIANTS Software game mods"
