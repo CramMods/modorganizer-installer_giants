@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>689</width>
-    <height>140</height>
+    <height>334</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -96,16 +96,44 @@
       </widget>
      </item>
      <item row="3" column="1">
-      <widget class="QLabel" name="DescriptionValue">
-       <property name="text">
-        <string/>
+      <widget class="QScrollArea" name="scrollArea">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>0</height>
+        </size>
        </property>
-       <property name="alignment">
-        <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
+       <property name="frameShape">
+        <enum>QFrame::Shape::Box</enum>
        </property>
-       <property name="wordWrap">
+       <property name="frameShadow">
+        <enum>QFrame::Shadow::Plain</enum>
+       </property>
+       <property name="widgetResizable">
         <bool>true</bool>
        </property>
+       <widget class="QLabel" name="DescriptionValue">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>592</width>
+          <height>208</height>
+         </rect>
+        </property>
+        <property name="styleSheet">
+         <string notr="true">padding: 2px;</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft|Qt::AlignmentFlag::AlignTop</set>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
+        </property>
+       </widget>
       </widget>
      </item>
     </layout>
