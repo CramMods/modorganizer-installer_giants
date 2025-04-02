@@ -50,10 +50,8 @@ class InstallerPlugin(IPluginInstallerSimple):
     # IPluginInstaller Implementation
 
     def isArchiveSupported(self, tree: IFileTree) -> bool:
-        currentGame = self._organizer.managedGame().gameShortName()
-        supportedGame = currentGame in self._supportedGames
         hasManifest = tree.exists("modDesc.xml", FileTreeEntry.FileTypes.FILE)
-        return supportedGame & hasManifest
+        return self.isGameSupported() & hasManifest
 
     def isManualInstaller(self) -> bool:
         return False
@@ -64,10 +62,16 @@ class InstallerPlugin(IPluginInstallerSimple):
     def onInstallationStart(
         self, archive: str, reinstallation: bool, current_mod: IModInterface
     ) -> None:
+        if not self.isGameSupported():
+            return
+
         self._installingArchive = archive
         return super().onInstallationStart(archive, reinstallation, current_mod)
 
     def onInstallationEnd(self, result: InstallResult, new_mod: IModInterface) -> None:
+        if not self.isGameSupported():
+            return
+
         if result == InstallResult.SUCCESS:
             relPath = self.findManifest(new_mod.fileTree())
             absPath = str(Path(new_mod.absolutePath()).joinpath(relPath))
@@ -122,6 +126,10 @@ class InstallerPlugin(IPluginInstallerSimple):
                 return InstallResult.CANCELED
 
     # Other
+
+    def isGameSupported(self) -> bool:
+        currentGame = self._organizer.managedGame().gameShortName()
+        return currentGame in self._supportedGames
 
     def findManifest(self, tree: IFileTree, depth: int = 0) -> str:
         item = tree.find("modDesc.xml", FileTreeEntry.FileTypes.FILE)
